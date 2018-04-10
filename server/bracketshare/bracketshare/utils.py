@@ -17,8 +17,10 @@ def rgb_to_int(rgb_string):
 # --------------------------------------------------
 def int_to_rgb(rgb_int, hashtag=True):
 	# Exception Checks
+	if rgb_int is None:
+		return '#' if hashtag else ''
 	if not isinstance(rgb_int, int):
-		raise TypeError('int_to_rgb() argument must be an int, not {}'.format(type(color).__name__))
+		raise TypeError('int_to_rgb() argument must be an int, not {}'.format(type(rgb_int).__name__))
 	# Implementation
 	rgb_string =  '{:06x}'.format(rgb_int)
 	if hashtag:

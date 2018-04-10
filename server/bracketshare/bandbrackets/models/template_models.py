@@ -83,7 +83,6 @@ class TemplateEntry(models.Model):
 							max_length 	= 100)
 	album_group_name 	= models.CharField(
 							max_length 	= 100)
-	order 				= models.SmallIntegerField()
 
 	# Upward Relations
 	# --------------------------------------------------
@@ -116,7 +115,13 @@ class TemplateBracket(models.Model):
 				unique		= True)
 	name 	= models.CharField(
 				max_length	= 100)
-	size	= models.SmallIntegerField()
+	size	= models.SmallIntegerField(
+				default=32,
+				choices=[
+					(4, '4'),
+					(8, '8'),
+					(16, '16'),
+					(32, '32')])
 
 	# Upward Relations
 	# --------------------------------------------------
