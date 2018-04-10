@@ -110,18 +110,20 @@ class TemplateEntry(models.Model):
 class TemplateBracket(models.Model):
 	# Properties
 	# --------------------------------------------------
-	uuid 	= models.UUIDField(
-				default		= uuid.uuid4, 
-				unique		= True)
-	name 	= models.CharField(
-				max_length	= 100)
-	size	= models.SmallIntegerField(
-				default=32,
-				choices=[
-					(4, '4'),
-					(8, '8'),
-					(16, '16'),
-					(32, '32')])
+	uuid 		= models.UUIDField(
+					default		= uuid.uuid4, 
+					unique		= True)
+	name 		= models.CharField(
+					max_length	= 100)
+	size		= models.SmallIntegerField(
+					default		= 32,
+					choices		= [
+						(	4, 	'4'		),
+						(	8, 	'8'		),
+						(	16,	'16'	),
+						(	32,	'32'	)])
+	created_on 	= models.DateTimeField(
+					auto_now_add= True)
 
 	# Upward Relations
 	# --------------------------------------------------
