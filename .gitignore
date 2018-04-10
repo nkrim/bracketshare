@@ -1,3 +1,9 @@
+# Django test databases
+db.sqlite3
+
+# .DS_Store Mac Finder files
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
