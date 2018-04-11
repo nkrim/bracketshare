@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 # Color RGB Conversion
 # ==================================================
-
 # rgb_to_int()
 # --------------------------------------------------
 def rgb_to_int(rgb_string):
@@ -13,7 +12,6 @@ def rgb_to_int(rgb_string):
 		raise ValueError('could not convert rgb_string to int: \'{}\''.format(rgb_string))
 	# Implemenation
 	return int(rgb_string if len(rgb_string) == 6 else rgb_string[1:], 16)
-
 
 # int_to_rgb()
 # --------------------------------------------------
