@@ -119,10 +119,10 @@ class TemplateBracket(models.Model):
 	size		= models.SmallIntegerField(
 					default		= 32,
 					choices		= [
-						(	4, 	'4'		),
-						(	8, 	'8'		),
-						(	16,	'16'	),
-						(	32,	'32'	)])
+						(	32, '32'	),
+						(	16, '16'	),
+						(	8,	'8'		),
+						(	4,	'4'		)])
 	created_on 	= models.DateTimeField(
 					auto_now_add= True)
 
