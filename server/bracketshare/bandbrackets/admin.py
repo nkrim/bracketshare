@@ -6,8 +6,8 @@ from .models import TemplateBracket, TemplateQuad, TemplateEntry, AlbumGroup
 
 @admin.register(TemplateBracket)
 class TemplateBracketAdmin(admin.ModelAdmin):
-	list_display = ('name', 'size', 'uuid')
-	readonly_fields = ('uuid',)
+	list_display = ('name', 'size', 'uuid', 'created_on')
+	readonly_fields = ('uuid', 'created_on')
 
 
 @admin.register(TemplateQuad)

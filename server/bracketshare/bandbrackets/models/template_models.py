@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 
 import uuid
+from datetime import datetime
 
 # TemplateQuad Model
 # ==================================================

@@ -16,7 +16,7 @@ class AlbumGroupSerializer(serializers.ModelSerializer):
 	# --------------------------------------------------
 	class Meta:
 		model = AlbumGroup
-		fields = ('name')
+		fields = ('name', 'bg_color', 'font_color')
 
 # TemplateEntry Serializers
 # ==================================================
@@ -38,13 +38,14 @@ class TemplateQuadSerializer(serializers.ModelSerializer):
 	# --------------------------------------------------
 	class Meta:
 		model = TemplateQuad
-		fields = ('name')
+		fields = ('name', 'entries')
 
 # TemplateQuad Serializers
 # ==================================================
-class TemplateQuadSerializer(serializers.ModelSerializer):
+class TemplateBracketSerializer(serializers.ModelSerializer):
 	# Fields
 	# --------------------------------------------------
+	album_groups = AlbumGroupSerializer(many=True)
 	top_left_quad = TemplateQuadSerializer()
 	bot_left_quad = TemplateQuadSerializer()
 	top_right_quad = TemplateQuadSerializer()
@@ -54,5 +55,7 @@ class TemplateQuadSerializer(serializers.ModelSerializer):
 	# --------------------------------------------------
 	class Meta:
 		model = TemplateBracket
-		fields = ('uuid', 'created_on', 'name', 'size')
+		fields = (	'uuid', 'created_on', 'name', 'size', 'album_groups',
+					'top_left_quad', 'bot_left_quad',
+					'top_right_quad', 'bot_right_quad',)
 		read_only_fields = ('uuid', 'created_on')

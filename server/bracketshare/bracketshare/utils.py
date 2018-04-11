@@ -33,7 +33,7 @@ def int_to_rgb(rgb_int, hashtag=True):
 # --------------------------------------------------
 class RGBField(serializers.Field):
 	def to_representation(self, obj):
-		if not isintance(obj, int):
+		if not isinstance(obj, int):
 			raise ValidationError('Invalid type. Expected an int, but got \'{}\''.format(type(obj).__name__))
 		if obj < 0 or obj > 0xffffff:
 			raise ValidationError('Integer color data out of bounds. Must not be less than 0 or greater than {:d}, but is {:d}'.format(0xffffff, obj))
