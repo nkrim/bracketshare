@@ -119,6 +119,7 @@ class TemplateBracket(models.Model):
 	size		= models.SmallIntegerField(
 					default		= 32,
 					choices		= [
+						(	64, '64'	),
 						(	32, '32'	),
 						(	16, '16'	),
 						(	8,	'8'		),
