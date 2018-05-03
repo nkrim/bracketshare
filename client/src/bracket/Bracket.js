@@ -1,7 +1,26 @@
+// @flow
+
 import React, { Component } from 'react';
 import './bracket.css';
 
-export default class Bracket extends Component {
+/* CONSTANT VALUES FOR BRACKET LAYOUT/SIZING */
+const branch_thickness = 6;
+const branch_length = 100;
+const leg_height_func = tier => Math.pow(2,8-tier);
+
+/* Bracket
+ * -------
+ * props:
+ * size : int - 64 (as of right now, should be 4, 8, 16, 32, or 64)
+ */
+type BracketProps = {
+	size: number,
+};
+export default class Bracket extends Component<BracketProps> {
+  	static defaultProps = {
+  		size: 64,
+  	}
+
   	render() {
 
 		return (
@@ -13,40 +32,124 @@ export default class Bracket extends Component {
 		);
   	}
 
-  	generateSvg(size) {
+  	generateSvg() {
   		//DO ERROR HANDLING LATER, CAN'T BE BOTHERED
+
+  		// Relevant Props
+  		const {size} = this.props;
 
   		// Generate base svg
   	}
 }
 
-class BracketBranch extends Component {
-	/* BracketBranch properties:
-	 * x : int
-	 * y : int
-	 * left : bool
-	 * tier : int (should be 0 to 4, considering a largest bracket of 64)
-	 */
+/* BracketQuad
+ * -----------
+ * props:
+ * index : int (0=topleft, 1=botleft, 2=topright, 3=botright)
+ * q_size : int (size of quad)
+ * vp_width : int
+ * vp_height : int
+ * 
+ * auto props:
+ * top : bool (dependent on index)
+ * left : bool (dependent on index)
+ */
+type BracketQuadProps = {
+	index: number,
+	q_size: number,
+	vp_width: number,
+	vp_height: number,
+	top?: bool,
+	left?: bool,
+};
+class BracketQuad extends Component<BracketQuadProps> {
 	constructor(props) {
-		// SUPER CALL
+		const { index } = props; 
+		props.top  = (index&0b01) == 0;
+		props.left = (index&0b10) == 0;
 		super(props);
 	}
+}
+
+
+
+/* BracketBranch
+ * -------------
+ * props:
+ * x : int
+ * y : int
+ * tier : int (0 is winner)
+ * left : bool
+ */
+type BracketBranchProps = {
+	x: number,
+	y: number,
+	tier: number,
+	left: bool
+};
+class BracketBranch extends Component<BracketBranchProps> {
 
 	render() {
-		// RELEVANT PROPS
-		const { x, y, left, tier } = this.props
+		// Relevant Props
+		const { x, y, tier, left } = this.props
 
-		// SET STATICS
-		const height = 6;
-		const width = 100;
+		// Set statics
+		const height = branch_thickness;
+		const width = branch_length;
+		const radius = branch_thickness/2;
 
-		// SET DYNAMICS
+		// Set dynamics
 		const classes = `bracket-branch tier-${tier}`
 
+		// Render
 		return (
 			<g className={classes}>
-				
+				<rect x={x} y={y} height={height} width={width}/>
+				<circle cx={left ? x : x+width} cy={y+radius} r={radius}/>
 			</g>
 		);
 	}
 }
+
+/* BracketLeg
+ * ----------
+ * props:
+ * x : int
+ * y : int
+ * tier : int (0 is leg to semis)
+ * up: bool
+ */
+type BracketLegProps = {
+	x: number,
+	y: number,
+	tier: number,
+	up: bool
+};
+class BracketLeg extends Component<BracketLegProps> {
+
+	render() {
+		// Relevant Props
+		const { x, y, tier, up } = this.props
+
+		// Set statics
+		const height = leg_height_func(tier);
+		const width = branch_thickness;
+		const radius = branch_thickness/2;
+
+		// Set dynamics
+		const classes = `bracket-leg tier-${tier}`
+
+		// Render
+		return (
+			<g className={classes}>
+				<rect x={x} y={y} height={height} width={width}/>
+				<circle cx={x+radius} cy={up ? y : y+height} r={radius}/>
+			</g>
+		);
+	}
+}
+
+
+
+
+
