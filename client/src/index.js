@@ -8,7 +8,7 @@ import registerServiceWorker from './registerServiceWorker';
 ReactDOM.render(
 	<div>
 		<App />
-		<Bracket />
+		<Bracket tiers={6}/>
 	</div>
 	, document.getElementById('root'));
 registerServiceWorker();

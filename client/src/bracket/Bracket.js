@@ -3,15 +3,19 @@
 import React, { Component } from 'react';
 import './bracket.css';
 
-/* CONSTANT VALUES for bracket layout/sizing */
-const branch_thickness = 6;
+/* SETTINGS for bracket layout/sizing */
+const branch_thickness = 4;
 const branch_length = 100;
-const leg_height_func = tier => Math.pow(2,8-tier);
-const winner_leg_height = 64;
+const podium_leg_height = 64;
+const starting_leg_height_exp = 8;
+
+/* FINAL VALUES for bracket layout - DO NOT CHANGE */
+const leg_height_func = tier => Math.pow(2, starting_leg_height_exp - tier);
 
 /* DYNAMIC VALUES set from the constants */
 const radius = branch_thickness/2;
 const branch_length_full = branch_length + radius;
+const leg_height_full_func = tier => leg_height_func(tier) + radius;
 
 /* Helper methods */
 function range(start, end, inclusive=false) {
@@ -22,6 +26,13 @@ function range(start, end, inclusive=false) {
 	}
 	return arr;
 }
+
+/* BracketDimensions type */
+type BracketDimensions = {
+	vb_width: number,
+	vb_height: number,
+	podium_width: number
+};
 
 /* Bracket
  * -------
@@ -37,22 +48,39 @@ export default class Bracket extends Component<BracketProps> {
   	};
 
   	render() {
-  		// Get viewport dimensions
-  		const {vp_width, vp_height, center_width} = Bracket.calcViewport(this.props.tiers);
-  		const viewport = `0 0 ${vp_width} ${vp_height}`;
+  		// Get relevant props
+  		const {tiers} = this.props;
+
+  		// Get view box dimensions
+  		const bracket_dimensions = Bracket.calcViewBox(this.props.tiers);
+  		const {vb_width, vb_height, podium_width} = bracket_dimensions;
+  		const viewbox = `0 0 ${vb_width} ${vb_height}`;
+
+  		// Get quad-specific props
+  		const q_tiers = tiers-1;
 
 		return (
 		 	<div className="Bracket">
-				<svg id="bracketSvg" xmlns="http://www.w3.org/2000/svg" viewBox={viewport}>
-					<BracketTier x={0} y={0} tier={4} top={true} left={true}/>
+				<svg id="bracketSvg" xmlns="http://www.w3.org/2000/svg" viewBox={viewbox}>
+					<BracketPodium b_dims={bracket_dimensions}/>
+					{
+						range(0,4).map(q_index => 
+							<BracketQuad 
+								key={BracketQuad.quadIndexToString(q_index)} 
+								index={q_index} 
+								q_tiers={q_tiers} 
+								b_dims={bracket_dimensions}
+							/>
+						)
+					}
 				</svg>
 			</div>
 		);
   	}
 
-  	static calcViewport(tiers) {
+  	static calcViewBox(tiers) : BracketDimensions {
   		/* Center width calc */
-  		const center_width = 3*branch_length + 2*branch_thickness;
+  		const podium_width = 3*branch_length + 2*branch_thickness;
 
   		// Get tiering properties
   		const q_tiers = tiers - 1;
@@ -61,33 +89,118 @@ export default class Bracket extends Component<BracketProps> {
   		// Edge-case for 1v1
   		if(leaf_tier < 0) {
   			return {
-  				vp_width: center_width,
-  				vp_height: winner_leg_height + branch_thickness,
-  				center_width: center_width
+  				vb_width: podium_width,
+  				vb_height: podium_leg_height + branch_thickness,
+  				podium_width: podium_width
   			};
   		}
 
   		/* Height calc */
   		// Get leaf properties
-  		const num_leaf_pairs = Math.pow(2,leaf_tier);
-		const leaf_spacing = 2*leg_height_func(leaf_tier);
-
+  		const num_leaves = 2*Math.pow(2,leaf_tier);
 		// Calc height
-		const height = num_leaf_pairs * (branch_thickness+leaf_spacing)
+		const height = num_leaves * (2*leg_height_full_func(leaf_tier))
 
 		/* Width calc */
 		// Calc side width
 		const side_width = branch_length * q_tiers;
 		// Calc width
-		const width = 2*side_width + center_width;
+		const width = 2*side_width + podium_width;
 
 		/* Return object */
 		return {
-			vp_width: width,
-			vp_height: height,
-			center_width: center_width
+			vb_width: width,
+			vb_height: height,
+			podium_width: podium_width
 		};
   	}
+}
+
+/* BracketPodium
+ * -------------
+ * props:
+ * b_dims : BracketDimensions (viewbox width/height + podium_width)
+ */
+type BracketCenterProps = {
+	b_dims: BracketDimensions
+};
+class BracketPodium extends Component<BracketDimensions> {
+	render() {
+		// Relevant props
+		const {b_dims} = this.props;
+		const {vb_width, vb_height} = b_dims;
+
+		// Dimensions / coords - Universal
+		const pod_rect_length = branch_length/2;
+		const y_branch = vb_height/2 - radius;
+		const y_leg = y_branch - podium_leg_height + radius;
+		const y_pod = y_leg;
+		// Classes - Universal
+		const pod_classes = 'bracket-podium-winner';
+		const leg_classes = 'bracket-podium-leg';
+		const branch_classes = 'bracket-podium-branch';
+
+		/* Construct podium right */
+		// Dimensions / coords
+		const x_pod_right = vb_width/2;
+		const x_leg_right = x_pod_right + pod_rect_length - radius;
+		const x_branch_right = x_leg_right + radius;
+		// Classes
+		const right_classes = 'bracket-podium-right';
+		// Construct
+		const pod_right = (
+			<g className={right_classes}>
+				<g className={pod_classes}>
+					<rect x={x_pod_right} y={y_pod} width={pod_rect_length} height={branch_thickness}/>
+					<circle cx={x_pod_right+pod_rect_length} cy={y_pod+radius} r={radius}/>
+				</g>
+				<g className={leg_classes}>
+					<rect x={x_leg_right} y={y_leg} width={branch_thickness} height={podium_leg_height}/>
+					<circle cx={x_leg_right+radius} cy={y_leg+podium_leg_height} r={radius}/>
+				</g>
+				<g className={branch_classes}>
+					<rect x={x_branch_right} y={y_branch} width={branch_length} height={branch_thickness}/>
+					<circle cx={x_branch_right+branch_length} cy={y_branch+radius} r={radius}/>
+				</g>
+			</g>
+		);
+
+		/* Construct podium right */
+		// Dimensions / coords
+		const x_pod_left = x_pod_right - pod_rect_length;
+		const x_leg_left = x_pod_left - radius;
+		const x_branch_left = x_leg_left - branch_length + radius;
+		// Classes
+		const left_classes = 'bracket-podium-left'
+		// Construct
+		const pod_left = (
+			<g className={left_classes}>
+				<g className={pod_classes}>
+					<rect x={x_pod_left} y={y_pod} width={pod_rect_length} height={branch_thickness}/>
+					<circle cx={x_pod_left} cy={y_pod+radius} r={radius}/>
+				</g>
+				<g className={leg_classes}>
+					<rect x={x_leg_left} y={y_leg} width={branch_thickness} height={podium_leg_height}/>
+					<circle cx={x_leg_left+radius} cy={y_leg+podium_leg_height} r={radius}/>
+				</g>
+				<g className={branch_classes}>
+					<rect x={x_branch_left} y={y_branch} width={branch_length} height={branch_thickness}/>
+					<circle cx={x_branch_left} cy={y_branch+radius} r={radius}/>
+				</g>
+			</g>
+		);
+
+		// Classes
+		const classes = 'bracket-podium';
+
+		// Render
+		return (
+			<g className={classes}>
+				{pod_left}
+				{pod_right}
+			</g>
+		);
+	}
 }
 
 /* BracketQuad
@@ -95,32 +208,19 @@ export default class Bracket extends Component<BracketProps> {
  * props:
  * index : int (0=topleft, 1=botleft, 2=topright, 3=botright)
  * q_tiers : int [0,5]
- * vp_width : int
- * vp_height : int
- * 
- * auto props:
- * top : bool (dependent on index)
- * left : bool (dependent on index)
+ * b_dims : BracketDimensions (viewbox width/height + podium_width)
  */
 type BracketQuadProps = {
 	index: number,
 	q_tiers: number,
-	vp_width: number,
-	vp_height: number,
-	center_width: number
+	b_dims: BracketDimensions
 };
 class BracketQuad extends Component<BracketQuadProps> {
-	evalIndex() {
-		return {
-			top: (this.props.index&0b01) === 0,
-			left: (this.props.index&0b10) === 0
-		};
-	}
-
 	render() {
 		// Relevant Props
-		const {q_tiers, vp_width, vp_height, center_width} = this.props;
-		const {top, left} = this.evalIndex();
+		const {index, q_tiers, b_dims} = this.props;
+		const {vb_width, vb_height, podium_width} = b_dims;
+		const {top, left} = BracketQuad.evalIndex(index);
 
 		// Early exit condition
 		if(q_tiers <= 0)
@@ -131,17 +231,48 @@ class BracketQuad extends Component<BracketQuadProps> {
 
 		/* TOP LEFT SIDE (for now) */
 		// Tier 0 case
-		let x_tier = (vp_width - center_width) / 2 - branch_length;
-		let y_tier = vp_height / 2 - radius;
+		let x_tier = left ? (vb_width - podium_width) / 2 - branch_length : (vb_width + podium_width) / 2 - branch_thickness;
+		let y_tier = vb_height / 2 - (top ? leg_height_full_func(0) : 0);
 		bracket_quad.push(
-			<BracketTier x={x_tier} y={y_tier} tier={0} top={true} left={true}/>
+			<BracketTier key={0} x={x_tier} y={y_tier} tier={0} top={top} left={left}/>
 		);
 
 		// Tier 1 - N
-		for(let i=0; i<q_tiers; i++) {
+		for(let i=1; i<q_tiers; i++) {
+			// Find new x_tier
+			x_tier = x_tier + (left ? -1 : 1)*branch_length;
 
+			// Find new y_tier
+			const tier_center_y = i===1 && !top ? y_tier + leg_height_func(i-1) : y_tier;
+			y_tier = tier_center_y - leg_height_func(i);
+
+			// Push new tier
+			bracket_quad.push(
+				<BracketTier key={i} x={x_tier} y={y_tier} tier={i} top={top} left={left}/>
+			);
 		}
 
+		// Classes
+		const classes = BracketQuad.quadIndexToString(index);
+
+		// Render quad
+		return (
+			<g className={classes}>
+				{bracket_quad}
+			</g> 
+		);
+	}
+
+	static evalIndex(index) {
+		return {
+			top: (index&0b01) === 0,
+			left: (index&0b10) === 0
+		};
+	}
+
+	static quadIndexToString(index) {
+		const {top, left} = BracketQuad.evalIndex(index);
+		return `${top ? 'top' : 'bot'}-${left ? 'left' : 'right'}-quad`;
 	}
 }
 
@@ -203,7 +334,7 @@ class BracketTier extends Component<BracketTierProps> {
 
 			// Render branch
 			return (
-				<g className={classes}>
+				<g key={branch} className={classes}>
 					<BracketBranch x={x_branch} y={y_branch} left={left}/>
 					<BracketLeg x={x_leg} y={y_leg} tier={tier} up={up_leg}/>
 				</g>
