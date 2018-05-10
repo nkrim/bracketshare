@@ -78,7 +78,7 @@ export default class Bracket extends Component<BracketProps> {
 		);
   	}
 
-  	static calcViewBox(tiers) : BracketDimensions {
+  	static calcViewBox(tiers : number) : BracketDimensions {
   		/* Center width calc */
   		const podium_width = 3*branch_length + 2*branch_thickness;
 
@@ -122,9 +122,9 @@ export default class Bracket extends Component<BracketProps> {
  * b_dims : BracketDimensions (viewbox width/height + podium_width)
  */
 type BracketCenterProps = {
-	b_dims: BracketDimensions
+	b_dims: BracketDimensions,
 };
-class BracketPodium extends Component<BracketDimensions> {
+class BracketPodium extends Component<BracketCenterProps> {
 	render() {
 		// Relevant props
 		const {b_dims} = this.props;
