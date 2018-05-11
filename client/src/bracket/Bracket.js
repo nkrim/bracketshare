@@ -1,7 +1,6 @@
 // @flow
 
 import React, { Component } from 'react';
-import './bracket.css';
 
 /* SETTINGS for bracket layout/sizing */
 const branch_thickness = 4;
