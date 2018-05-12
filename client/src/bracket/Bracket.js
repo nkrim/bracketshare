@@ -1,6 +1,7 @@
 // @flow
 
 import React, { Component } from 'react';
+import Radium from 'radium';
 
 /* SETTINGS for bracket layout/sizing */
 const branch_thickness = 4;
@@ -13,7 +14,6 @@ const leg_height_func = tier => Math.pow(2, starting_leg_height_exp - tier);
 
 /* DYNAMIC VALUES set from the constants */
 const radius = branch_thickness/2;
-const branch_length_full = branch_length + radius;
 const leg_height_full_func = tier => leg_height_func(tier) + radius;
 
 /* Helper methods */
@@ -37,30 +37,59 @@ type BracketDimensions = {
  * -------
  * props:
  * tiers : int [1,6]
+ * 
+ * styling:
+ * top_left_color : string
+ * bot_left_color : string
+ * top_right_color : string
+ * bot_right_color : string
  */
 type BracketProps = {
-	tiers: number
+	// props
+	tiers: number,
+	// styling
+	top_left_color : string,
+ 	bot_left_color : string,
+ 	top_right_color : string,
+ 	bot_right_color : string,
 };
 export default class Bracket extends Component<BracketProps> {
   	static defaultProps = {
+  		// props
   		tiers: 6,
+  		// styling
+		top_left_color : 'red',
+	 	bot_left_color : 'blue',
+	 	top_right_color : 'purple',
+	 	bot_right_color : 'green',
   	};
 
   	render() {
   		// Get relevant props
-  		const {tiers} = this.props;
+  		const {tiers, top_left_color, bot_left_color, top_right_color, bot_right_color} = this.props;
 
   		// Get view box dimensions
   		const bracket_dimensions = Bracket.calcViewBox(this.props.tiers);
-  		const {vb_width, vb_height, podium_width} = bracket_dimensions;
+  		const {vb_width, vb_height} = bracket_dimensions;
   		const viewbox = `0 0 ${vb_width} ${vb_height}`;
 
   		// Get quad-specific props
   		const q_tiers = tiers-1;
 
+  		// Styling
+  		const quad_colors = [
+  			top_left_color,
+  			bot_left_color,
+  			top_right_color,
+  			bot_right_color,
+  		]
+  		const b_styles = {
+  			maxHeight: '90vh',
+  		}
+
 		return (
 		 	<div className="Bracket">
-				<svg id="bracketSvg" xmlns="http://www.w3.org/2000/svg" viewBox={viewbox}>
+				<svg id="bracketSvg" xmlns="http://www.w3.org/2000/svg" viewBox={viewbox} style={b_styles}>
 					<BracketPodium b_dims={bracket_dimensions}/>
 					{
 						range(0,4).map(q_index => 
@@ -69,6 +98,7 @@ export default class Bracket extends Component<BracketProps> {
 								index={q_index} 
 								q_tiers={q_tiers} 
 								b_dims={bracket_dimensions}
+								color={quad_colors[q_index]}
 							/>
 						)
 					}
@@ -114,16 +144,18 @@ export default class Bracket extends Component<BracketProps> {
 		};
   	}
 }
+/* Radium Wrapping */
+Bracket = Radium(Bracket);
 
 /* BracketPodium
  * -------------
  * props:
  * b_dims : BracketDimensions (viewbox width/height + podium_width)
  */
-type BracketCenterProps = {
+type BracketPodiumProps = {
 	b_dims: BracketDimensions,
 };
-class BracketPodium extends Component<BracketCenterProps> {
+class BracketPodium extends Component<BracketPodiumProps> {
 	render() {
 		// Relevant props
 		const {b_dims} = this.props;
@@ -207,17 +239,25 @@ class BracketPodium extends Component<BracketCenterProps> {
  * props:
  * index : int (0=topleft, 1=botleft, 2=topright, 3=botright)
  * q_tiers : int [0,5]
- * b_dims : BracketDimensions (viewbox width/height + podium_width)
+ * b_dims : BracketDimensions (viewbox width/height + podium_width),
  */
 type BracketQuadProps = {
+	// props
 	index: number,
-	q_tiers: number,
-	b_dims: BracketDimensions
+	q_tiers: number, 
+	b_dims: BracketDimensions,
+	// styling
+	color: string,
 };
 class BracketQuad extends Component<BracketQuadProps> {
+	static defaultProps = {
+		// styling
+  		color: '#000',
+  	};
+
 	render() {
 		// Relevant Props
-		const {index, q_tiers, b_dims} = this.props;
+		const {index, q_tiers, b_dims, color} = this.props;
 		const {vb_width, vb_height, podium_width} = b_dims;
 		const {top, left} = BracketQuad.evalIndex(index);
 
@@ -254,9 +294,16 @@ class BracketQuad extends Component<BracketQuadProps> {
 		// Classes
 		const classes = BracketQuad.quadIndexToString(index);
 
+		// Styling
+		const styles = {
+			base: {
+				fill: color,
+			}
+		}
+
 		// Render quad
 		return (
-			<g className={classes}>
+			<g className={classes} style={[styles.base]}>
 				{bracket_quad}
 			</g> 
 		);
@@ -274,6 +321,8 @@ class BracketQuad extends Component<BracketQuadProps> {
 		return `${top ? 'top' : 'bot'}-${left ? 'left' : 'right'}-quad`;
 	}
 }
+/* Radium Wrapping */
+BracketQuad = Radium(BracketQuad);
 
 /* BracketTier
  * -----------
@@ -299,7 +348,6 @@ class BracketTier extends Component<BracketTierProps> {
 
 		// Dimensions / coords
 		const leg_height = leg_height_func(tier);
-		const leg_height_full = leg_height + branch_thickness;
 		const x_branch = left ? x : x+radius;
 		const x_leg = left ? x+branch_length : x;
 
