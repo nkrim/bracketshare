@@ -83,12 +83,20 @@ export default class BracketSVG extends Component<BracketSVGProps> {
   			top_right_color,
   			bot_right_color,
   		]
-  		const b_styles = {
-  			//maxHeight: '90vh',
+  		const bw_styles = {
+  			width: vb_width,
+  			height: vb_height,
+  			// Centering
+  			position: 'absolute',
+  			margin: 'auto',
+  			top: 0,
+  			left: 0,
+  			right: 0,
   		}
+  		const b_styles = {}
 
 		return (
-		 	<div className="bracket-svg">
+		 	<div className="bracket-wrapper" style={bw_styles}>
 				<svg id="bracketSvg" xmlns="http://www.w3.org/2000/svg" viewBox={viewbox} style={b_styles}>
 					<BracketPodium b_dims={bracket_dimensions}/>
 					{
@@ -126,9 +134,11 @@ export default class BracketSVG extends Component<BracketSVGProps> {
 
   		/* Height calc */
   		// Get leaf properties
-  		const num_leaves = 2*Math.pow(2,leaf_tier);
+  		const num_q_leaves = Math.pow(2,leaf_tier);
+  		const branch_leg_height = leg_height_full_func(leaf_tier);
+  		const gap_height = 2*leg_height_func(leaf_tier) - branch_thickness;
 		// Calc height
-		const height = num_leaves * (2*leg_height_full_func(leaf_tier))
+		const height = (2*num_q_leaves * branch_leg_height) + ((num_q_leaves-1) * gap_height);
 
 		/* Width calc */
 		// Calc side width
@@ -282,7 +292,7 @@ class BracketQuad extends Component<BracketQuadProps> {
 			x_tier = x_tier + (left ? -1 : 1)*branch_length;
 
 			// Find new y_tier
-			const tier_center_y = i===1 && !top ? y_tier + leg_height_func(i-1) : y_tier;
+			const tier_center_y = i===1 && !top ? y_tier + leg_height_func(i-1) - radius : y_tier;
 			y_tier = tier_center_y - leg_height_func(i);
 
 			// Push new tier

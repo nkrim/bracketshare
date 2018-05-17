@@ -11,8 +11,10 @@ import BracketEntry from './bracket/BracketEntry';
 ReactDOM.render(
 	<div>
 		<App />
-		<BracketSVG tiers={6}/>
-		<BracketEntry name="Black Paint" album_group={{name: "YOTS", bg_color: 'green', font_color: 'yellow'}} x={100} y={100}/>
+		<div class="bracket-container" style={{position: 'relative'}}>
+			<BracketSVG tiers={6}/>
+			<BracketEntry name="Black Paint" album_group={{name: "YOTS", bg_color: 'green', font_color: 'yellow'}} x={100} y={100}/>
+		</div>
 	</div>
 	, document.getElementById('root'));
 registerServiceWorker();
