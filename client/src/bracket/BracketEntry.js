@@ -7,26 +7,28 @@ import { type AlbumGroupProps } from './AlbumGroup';
 import { branch_length } from './BracketSVG';
 
 /* SETTINGS for entry style */
-const entry_height = 16;
+const entry_height = 24;
+const border_width = 3;
 const div_style_base = {
 	// Layout styles
 	display: 'inline-block',
 	position: 'absolute',
 	width: branch_length,
 	height: entry_height,
+	boxSizing: 'border-box',
 	// Border styles
 	borderStyle: 'solid',
-	borderWidth: 3
+	borderWidth: border_width
 };
 const span_style_base = {
 	// Layout styles
 	display: 'block',
 	height: '100%',
-	lineHeight: `${entry_height}px`,
+	lineHeight: `${entry_height - 2*border_width}px`,
 	textAlign: 'center',
 	// Font styles
-	fontSize: 12,
-	fontWeight: 700,
+	fontSize: 14,
+	// fontWeight: 700,
 	// Overflow handling
 	whiteSpace: 'nowrap', 
     overflow: 'hidden',

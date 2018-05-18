@@ -1,11 +1,11 @@
 // @flow
 
-import React, { Component } from 'react';
+import React, { Component, type Node } from 'react';
 import Radium from 'radium';
 
 /* SETTINGS for bracket layout/sizing */
 const branch_thickness = 4;
-export const branch_length = 100;
+export const branch_length = 150;
 const podium_leg_height = 64;
 const starting_leg_height_exp = 8;
 
@@ -45,6 +45,8 @@ type BracketDimensions = {
  * bot_right_color : string
  */
 type BracketSVGProps = {
+	// children
+	children?: Node,
 	// props
 	tiers: number,
 	// styling
@@ -66,7 +68,7 @@ export default class BracketSVG extends Component<BracketSVGProps> {
 
   	render() {
   		// Get relevant props
-  		const { tiers, top_left_color, bot_left_color, top_right_color, bot_right_color } = this.props;
+  		const { children, tiers, top_left_color, bot_left_color, top_right_color, bot_right_color } = this.props;
 
   		// Get view box dimensions
   		const bracket_dimensions = BracketSVG.calcViewBox(this.props.tiers);
@@ -90,8 +92,9 @@ export default class BracketSVG extends Component<BracketSVGProps> {
   			position: 'absolute',
   			margin: 'auto',
   			top: 0,
-  			left: 0,
-  			right: 0,
+  			left: '50%',
+  			transformOrigin: 'top',
+  			transform: 'translateX(-50%) scale(0.7)', // SCALE IS FOR TESTING VISUALS
   		}
   		const b_styles = {}
 
@@ -111,6 +114,7 @@ export default class BracketSVG extends Component<BracketSVGProps> {
 						)
 					}
 				</svg>
+				{children}
 			</div>
 		);
   	}
